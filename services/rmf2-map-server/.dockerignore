@@ -1,0 +1,37 @@
+# Exclude VCS and metadata
+.git
+.gitignore
+.DS_Store
+
+# Build outputs
+build/
+bin/
+dist/
+*.exe
+
+# Go artifacts
+*.test
+coverage.out
+*.out
+
+# Temporary files
+*.tmp
+*.log
+tmp/
+.cache/
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*~
+
+# Node
+node_modules/
+
+# Environment
+.env
+.env.local
+
+# Docker overrides
+docker-compose.override.yml

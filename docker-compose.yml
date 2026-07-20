@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  rmf2-map-server:
+    build:
+      context: ./services/rmf2-map-server
+      dockerfile: Dockerfile
+    image: rmf2-map-server:local
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+    restart: unless-stopped

@@ -1,0 +1,51 @@
+name: Go — Build
+
+on:
+  push:
+    paths:
+      - 'services/rmf2-map-server/**'
+  pull_request:
+    paths:
+      - 'services/rmf2-map-server/**'
+
+jobs:
+  build:
+    name: Build (Go ${{ matrix.go-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: ['1.20', '1.21', '1.22']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            services/rmf2-map-server/pkg/mod
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('services/rmf2-map-server/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
+
+      - name: Install dependencies
+        run: go mod download
+        working-directory: services/rmf2-map-server
+
+      - name: Build binary
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./build/rmf2-map-server
+        working-directory: services/rmf2-map-server
+
+      - name: Archive binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: rmf2-map-server-binary-${{ matrix.go-version }}
+          path: services/rmf2-map-server/build/rmf2-map-server

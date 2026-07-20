@@ -1,0 +1,46 @@
+{
+  "robots": [
+    {
+      "id": 1,
+      "name": "Robot 01",
+      "model": "amr",
+      "vda5050_id": "robot-01",
+      "speed_mps": 1.2,
+      "loop": true,
+      "path": [
+        {"id": "R1-A", "x": -10.0, "y": 16.0, "theta": 0.0, "label": "Square A"},
+        {"id": "R1-B", "x": 12.0,  "y": 16.0, "theta": 0.0, "label": "Square B"},
+        {"id": "R1-C", "x": 12.0,  "y": 4.0,  "theta": 0.0, "label": "Square C"},
+        {"id": "R1-D", "x": -10.0, "y": 4.0,  "theta": 0.0, "label": "Square D"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Robot 02",
+      "model": "amr",
+      "vda5050_id": "robot-02",
+      "speed_mps": 0.9,
+      "loop": true,
+      "path": [
+        {"id": "R2-A", "x": 14.0, "y": 16.0, "theta": 0.0, "label": "Square A"},
+        {"id": "R2-B", "x": 26.0, "y": 16.0, "theta": 0.0, "label": "Square B"},
+        {"id": "R2-C", "x": 26.0, "y": 4.0,  "theta": 0.0, "label": "Square C"},
+        {"id": "R2-D", "x": 14.0, "y": 4.0,  "theta": 0.0, "label": "Square D"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Robot 03",
+      "model": "amr",
+      "vda5050_id": "robot-03",
+      "speed_mps": 1.5,
+      "loop": true,
+      "path": [
+        {"id": "R3-A", "x": -6.0, "y": 17.0, "theta": 0.0, "label": "Square A"},
+        {"id": "R3-B", "x": 8.0,  "y": 17.0, "theta": 0.0, "label": "Square B"},
+        {"id": "R3-C", "x": 8.0,  "y": 3.0,  "theta": 0.0, "label": "Square C"},
+        {"id": "R3-D", "x": -6.0, "y": 3.0,  "theta": 0.0, "label": "Square D"}
+      ]
+    }
+  ]
+}

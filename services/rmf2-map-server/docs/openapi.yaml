@@ -1,0 +1,499 @@
+openapi: 3.1.0
+
+info:
+  title: RMF2 Map Backend
+  description: >
+    Multi-tenant REST API serving robot fleet data — map graphs, robot metadata,
+    planned paths, live positions, and 3D GLB assets — scoped per organisation
+    via API key authentication.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8008
+    description: Local development server
+
+security:
+  - bearerAuth: []
+
+paths:
+
+  /:
+    get:
+      operationId: root
+      summary: Root
+      description: Returns a status message confirming the server is running.
+      security: []
+      tags: [Health]
+      responses:
+        "200":
+          description: Server is running
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+              example:
+                message: rmf2 map backend is running
+
+  /health:
+    get:
+      operationId: health
+      summary: Health check
+      description: Liveness probe. No authentication required.
+      security: []
+      tags: [Health]
+      responses:
+        "200":
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusResponse"
+              example:
+                status: ok
+
+  /organisation:
+    get:
+      operationId: getOrganisation
+      summary: Get organisation
+      description: Returns the organisation name resolved from the caller's API key.
+      tags: [Organisation]
+      responses:
+        "200":
+          description: Organisation name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganisationResponse"
+              example:
+                organisation: ros-industrial
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /robots:
+    get:
+      operationId: getRobots
+      summary: List robots
+      description: Returns all robots belonging to the caller's organisation, with their id, name, and model string.
+      tags: [Robots]
+      responses:
+        "200":
+          description: List of robots
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RobotsResponse"
+              example:
+                robots:
+                  - id: 1
+                    name: Robot 01
+                    model: AMR-Type1
+                  - id: 2
+                    name: Robot 02
+                    model: AGV-Type2
+                  - id: 3
+                    name: Robot 03
+                    model: AMR-Type1
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /map:
+    get:
+      operationId: getMap
+      summary: Get map graph
+      description: >
+        Returns the full factory floor graph for the caller's organisation —
+        all nodes and edges from the LIF file.
+      tags: [Map]
+      responses:
+        "200":
+          description: Map graph with nodes and edges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MapResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /path/{robotId}:
+    get:
+      operationId: getPath
+      summary: Get robot path
+      description: >
+        Returns the planned path for a robot as an ordered list of waypoints
+        and the sequential edges connecting them. Looped dummy routes include
+        a closing edge from the final waypoint back to the first waypoint.
+      tags: [Robots]
+      parameters:
+        - $ref: "#/components/parameters/robotId"
+      responses:
+        "200":
+          description: Robot path as waypoints and edges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PathResponse"
+              example:
+                loop: true
+                nodes:
+                  - id: WP0
+                    x: -10.0
+                    y: 25.5
+                    theta: 0.0
+                    label: Start
+                  - id: WP1
+                    x: 12.0
+                    y: 1.5
+                    theta: 0.0
+                    label: Goal
+                edges:
+                  - from: WP0
+                    to: WP1
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /position/{robotId}:
+    get:
+      operationId: getPosition
+      summary: Get robot position
+      description: >
+        Returns the current position, orientation, and state of a robot.
+        Intended to be polled at 500ms intervals. When VDA5050 is disabled,
+        dummy positions are simulated from each robot's route, speed, and loop
+        settings in `robots.json`.
+      tags: [Robots]
+      parameters:
+        - $ref: "#/components/parameters/robotId"
+      responses:
+        "200":
+          description: Current robot position
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PositionResponse"
+              example:
+                id: 2
+                x: 12.0
+                y: 0.0
+                z: 12.5
+                theta: 0.0
+                state: stopped
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /scene:
+    get:
+      operationId: getScene
+      summary: Get scene model
+      description: >
+        Streams the organisation's 3D scene as a binary GLB file.
+        Expects `scene.draco.glb` to be present in the organisation's data directory.
+      tags: [Assets]
+      responses:
+        "200":
+          description: Binary GLB scene file
+          content:
+            model/gltf-binary:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /models/{robotModel}:
+    get:
+      operationId: getModel
+      summary: Get robot model
+      description: >
+        Streams the GLB model file for the given robot model string.
+        Falls back to `robot.glb` if no model-specific file is found.
+      tags: [Assets]
+      parameters:
+        - name: robotModel
+          in: path
+          required: true
+          description: Robot model string as returned by GET /robots (e.g. `AMR-Type1`)
+          schema:
+            type: string
+          example: AMR-Type1
+      responses:
+        "200":
+          description: Binary GLB robot model file
+          content:
+            model/gltf-binary:
+              schema:
+                type: string
+                format: binary
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: >
+        API key mapped to an organisation. Keys are defined in `data/api-keys.json`.
+        Example: `Authorization: Bearer key-ros-industrial-secret`
+
+  parameters:
+    robotId:
+      name: robotId
+      in: path
+      required: true
+      description: Numeric robot ID as returned by GET /robots
+      schema:
+        type: integer
+        minimum: 1
+      example: 1
+
+  responses:
+    BadRequest:
+      description: Bad request — invalid path parameter
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            detail: robotId must be an integer
+
+    Unauthorized:
+      description: Missing or invalid API key
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            detail: unauthorized
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            detail: robot 99 not found
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            detail: failed to read robots file
+
+  schemas:
+
+    ErrorResponse:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+          description: Human-readable error message
+
+    MessageResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    StatusResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+
+    OrganisationResponse:
+      type: object
+      required: [organisation]
+      properties:
+        organisation:
+          type: string
+          description: Organisation name resolved from the caller's API key
+          example: ros-industrial
+
+    RobotSummary:
+      type: object
+      required: [id, name, model]
+      properties:
+        id:
+          type: integer
+          description: Numeric robot identifier
+          example: 1
+        name:
+          type: string
+          description: Human-readable robot name
+          example: Robot 01
+        model:
+          type: string
+          description: Robot model string — used to fetch the GLB via GET /models/{robotModel}
+          example: AMR-Type1
+
+    RobotsResponse:
+      type: object
+      required: [robots]
+      properties:
+        robots:
+          type: array
+          items:
+            $ref: "#/components/schemas/RobotSummary"
+
+    Node:
+      type: object
+      required: [node_id, x, y, theta]
+      properties:
+        node_id:
+          type: string
+          example: P0
+        x:
+          type: number
+          format: float
+          example: -30.8
+        y:
+          type: number
+          format: float
+          example: -49.3
+        theta:
+          type: number
+          format: float
+          description: Orientation in radians
+          example: 0.0
+
+    Edge:
+      type: object
+      required: [edge_id, start_node_id, end_node_id, bidirectional]
+      properties:
+        edge_id:
+          type: string
+          example: E1
+        start_node_id:
+          type: string
+          example: P0
+        end_node_id:
+          type: string
+          example: P1
+        bidirectional:
+          type: boolean
+          example: true
+
+    MapResponse:
+      type: object
+      required: [nodes, edges]
+      properties:
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Node"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/Edge"
+
+    Waypoint:
+      type: object
+      required: [id, x, y, theta, label]
+      properties:
+        id:
+          type: string
+          example: WP0
+        x:
+          type: number
+          format: float
+          example: -10.0
+        y:
+          type: number
+          format: float
+          example: 25.5
+        theta:
+          type: number
+          format: float
+          description: Orientation in radians
+          example: 0.0
+        label:
+          type: string
+          example: Start
+
+    PathEdge:
+      type: object
+      required: [from, to]
+      properties:
+        from:
+          type: string
+          description: Waypoint ID of the edge start
+          example: WP0
+        to:
+          type: string
+          description: Waypoint ID of the edge end
+          example: WP1
+
+    PathResponse:
+      type: object
+      required: [nodes, edges, loop]
+      properties:
+        loop:
+          type: boolean
+          description: Whether the path loops from the final waypoint back to the first waypoint
+          example: true
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Waypoint"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/PathEdge"
+
+    PositionResponse:
+      type: object
+      required: [id, x, y, z, theta]
+      properties:
+        id:
+          type: integer
+          description: Robot ID
+          example: 1
+        x:
+          type: number
+          format: float
+          example: -10.0
+        y:
+          type: number
+          format: float
+          description: WebGL up-axis height. Static robot data is placed on the floor.
+          example: 0.0
+        z:
+          type: number
+          format: float
+          description: Robotics Y coordinate mapped onto the WebGL floor plane.
+          example: 25.5
+        theta:
+          type: number
+          format: float
+          description: Orientation in radians
+          example: 0.0
+        state:
+          type: string
+          description: Current robot state, when known.
+          enum: [driving, stopped]
+          example: stopped

@@ -13,7 +13,7 @@ func TestHealth(t *testing.T) {
 
 	// Create a new HTTP request for the /health endpoint - nil means no request body
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
-	
+
 	// Create a fake response writer
 	// Instead of sending a real network response, the handler writes into rr, and the test can inspect:
 	/*
@@ -28,15 +28,15 @@ func TestHealth(t *testing.T) {
 
 	// This checks the HTTP status code.
 	if rr.Code != http.StatusOK {
-	t.Fatalf("expected status %d, got %d", http.StatusOK, rr.Code)
+		t.Fatalf("expected status %d, got %d", http.StatusOK, rr.Code)
 	}
 
 	// This creates a variable to hold the decoded JSON response.
 	// Since response is expected to be a JSON object with string keys and string values, we use map[string]string.
 	/* e.g.
-		{
-		"status": "ok"
-		}
+	{
+	"status": "ok"
+	}
 	*/
 	var body map[string]string
 
@@ -58,7 +58,7 @@ func TestRoot(t *testing.T) {
 
 	// Create a new HTTP request for the / endpoint - nil means no request body
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	
+
 	// Create a fake response writer
 	rr := httptest.NewRecorder()
 
@@ -67,7 +67,7 @@ func TestRoot(t *testing.T) {
 
 	// This checks the HTTP status code.
 	if rr.Code != http.StatusOK {
-	t.Fatalf("expected status %d, got %d", http.StatusOK, rr.Code)
+		t.Fatalf("expected status %d, got %d", http.StatusOK, rr.Code)
 	}
 
 	// This creates a variable to hold the decoded JSON response.
@@ -88,10 +88,10 @@ func TestRoot(t *testing.T) {
 func TestGetOrganisation(t *testing.T) {
 	// Decalre new handler with a temporary directory and test organisation, nil for no VDA5050 poller
 	h := NewHandler(t.TempDir(), "test-org", nil)
-	
+
 	// Create a new HTTP request for the /organisation endpoint - nil means no request body
 	req := httptest.NewRequest(http.MethodGet, "/organisation", nil)
-	
+
 	// Create a fake response writer
 	rr := httptest.NewRecorder()
 

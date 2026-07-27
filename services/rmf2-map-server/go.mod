@@ -1,3 +1,3 @@
-module rmf2map/server
+module rmf2-map-server
 
-go 1.22
+go 1.26.4

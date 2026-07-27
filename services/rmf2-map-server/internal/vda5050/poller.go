@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"rmf2map/server/internal/repository"
+	"rmf2-map-server/internal/repository"
 )
 
 const pollInterval = 200 * time.Millisecond

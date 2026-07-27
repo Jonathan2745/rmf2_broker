@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"rmf2map/server/internal/repository"
+	"rmf2-map-server/internal/repository"
 )
 
 type orgKey struct{}

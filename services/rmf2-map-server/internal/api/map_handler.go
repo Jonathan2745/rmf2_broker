@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"rmf2map/server/internal/response"
-	"rmf2map/server/internal/service"
+	"rmf2-map-server/internal/response"
+	"rmf2-map-server/internal/service"
 )
 
 func (h *Handler) GetMap(w http.ResponseWriter, r *http.Request) {

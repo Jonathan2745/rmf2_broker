@@ -11,11 +11,11 @@ import (
 	"syscall"
 	"time"
 
-	"rmf2map/server/internal/api"
-	"rmf2map/server/internal/config"
-	"rmf2map/server/internal/middleware"
-	"rmf2map/server/internal/service"
-	"rmf2map/server/internal/vda5050"
+	"rmf2-map-server/internal/api"
+	"rmf2-map-server/internal/config"
+	"rmf2-map-server/internal/middleware"
+	"rmf2-map-server/internal/service"
+	"rmf2-map-server/internal/vda5050"
 )
 
 func main() {

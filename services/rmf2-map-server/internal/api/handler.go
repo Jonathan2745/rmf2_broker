@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"rmf2map/server/internal/middleware"
-	"rmf2map/server/internal/vda5050"
+	"rmf2-map-server/internal/middleware"
+	"rmf2-map-server/internal/vda5050"
 )
 
 type Handler struct {

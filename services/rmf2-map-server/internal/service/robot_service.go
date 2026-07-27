@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"rmf2map/server/internal/repository"
+	"rmf2-map-server/internal/repository"
 )
 
 const defaultSpeedMPS = 1.0

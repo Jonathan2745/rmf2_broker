@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"rmf2map/server/internal/config"
-	"rmf2map/server/internal/vda5050"
+	"rmf2-map-server/internal/config"
+	"rmf2-map-server/internal/vda5050"
 )
 
 func RegisterRoutes(mux *http.ServeMux, cfg config.Config, poller *vda5050.Poller) {
